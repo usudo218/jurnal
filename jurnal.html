@@ -1,126 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <base target="_top">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <style>
-    body { background-color: #f0f2f5; padding-top: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .card { border: none; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .btn-submit { background: #007bff; border: none; padding: 12px; font-weight: bold; transition: 0.3s; }
-    .btn-submit:hover { background: #0056b3; transform: translateY(-2px); }
-    #imagePreview { max-width: 100%; height: auto; border-radius: 10px; margin-top: 15px; display: none; border: 2px solid #dee2e6; }
-    .loading-spinner { display: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurnal Pak Cokro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light p-3">
 
-<div class="container mb-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card p-4">
-        <h3 class="text-center mb-4 text-primary">Jurnal Harian</h3>
-        
-        <form id="jurnalForm">
-          <div class="mb-3">
-            <label class="form-label fw-bold">Tanggal Kegiatan</label>
+<div class="container bg-white p-4 rounded shadow-sm" style="max-width: 500px;">
+    <h3 class="text-center text-primary mb-4">Jurnal Harian</h3>
+    <form id="formJurnal">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Tanggal</label>
             <input type="date" class="form-control" id="tanggal" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Uraian Kegiatan</label>
-            <textarea class="form-control" id="uraian" rows="4" placeholder="Apa yang Anda kerjakan hari ini?" required></textarea>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Bukti Foto / Dokumen</label>
-            <input type="file" class="form-control" id="foto" accept="image/*" capture="camera" onchange="previewImage(event)" required>
-            <img id="imagePreview" src="" alt="Hasil Foto">
-          </div>
-
-          <button type="button" id="btnSimpan" class="btn btn-primary btn-submit w-100" onclick="startUpload()">
-            <span id="btnText">Simpan ke Jurnal</span>
-            <div id="loader" class="spinner-border spinner-border-sm loading-spinner" role="status"></div>
-          </button>
-        </form>
-
-        <div id="status" class="mt-3 text-center fw-bold"></div>
-      </div>
-    </div>
-  </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Kegiatan</label>
+            <textarea class="form-control" id="uraian" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Ambil Foto</label>
+            <input type="file" class="form-control" id="foto" accept="image/*" capture="camera" required>
+        </div>
+        <button type="submit" id="btnSimpan" class="btn btn-primary w-100">Kirim Jurnal</button>
+    </form>
+    <div id="status" class="mt-3 text-center fw-bold"></div>
 </div>
 
 <script>
-  // Fungsi untuk menampilkan preview foto segera setelah difoto/dipilih
-  function previewImage(event) {
-    const reader = new FileReader();
-    const preview = document.getElementById('imagePreview');
-    
-    reader.onload = function() {
-      preview.src = reader.result;
-      preview.style.display = 'block';
-    }
-    
-    if (event.target.files[0]) {
-      reader.readAsDataURL(event.target.files[0]);
-    }
-  }
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbx6vAN0k05W-p_jz0ktDyPCUIC2l_2V6Ne71w_4arWD9j5Kp1brn4YA5srGi3aJePPe/exec';
+    const form = document.getElementById('formJurnal');
 
-  // Fungsi utama pengiriman data
-  function startUpload() {
-    const fileInput = document.getElementById('foto');
-    const tanggal = document.getElementById('tanggal').value;
-    const uraian = document.getElementById('uraian').value;
-    const btn = document.getElementById('btnSimpan');
-    const loader = document.getElementById('loader');
-    const status = document.getElementById('status');
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSimpan');
+        const status = document.getElementById('status');
+        const file = document.getElementById('foto').files[0];
+        
+        btn.disabled = true;
+        status.innerText = "Sedang Mengirim...";
 
-    if (!fileInput.files[0] || !tanggal || !uraian) {
-      alert("Mohon lengkapi semua data!");
-      return;
-    }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function() {
+            const base64Data = reader.result.split(',')[1];
+            
+            const payload = {
+                tanggal: document.getElementById('tanggal').value,
+                uraian: document.getElementById('uraian').value,
+                data: base64Data,
+                type: file.type,
+                name: file.name
+            };
 
-    // Animasi Loading
-    btn.disabled = true;
-    loader.style.display = "inline-block";
-    document.getElementById('btnText').innerText = "Sedang Mengirim...";
-
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-      const payload = {
-        tanggal: tanggal,
-        uraian: uraian,
-        data: e.target.result.split(',')[1],
-        type: file.type,
-        name: file.name
-      };
-
-      google.script.run
-        .withSuccessHandler((msg) => {
-          status.innerHTML = msg;
-          document.getElementById('jurnalForm').reset();
-          document.getElementById('imagePreview').style.display = 'none';
-          resetButton();
-        })
-        .withFailureHandler((err) => {
-          status.innerHTML = "❌ Terjadi kesalahan: " + err;
-          resetButton();
-        })
-        .uploadData(payload);
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  function resetButton() {
-    const btn = document.getElementById('btnSimpan');
-    const loader = document.getElementById('loader');
-    btn.disabled = false;
-    loader.style.display = "none";
-    document.getElementById('btnText').innerText = "Simpan ke Jurnal";
-  }
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.text())
+            .then(msg => {
+                status.className = "mt-3 text-center fw-bold text-success";
+                status.innerText = msg;
+                form.reset();
+                btn.disabled = false;
+            })
+            .catch(err => {
+                status.className = "mt-3 text-center fw-bold text-danger";
+                status.innerText = "Gagal mengirim!";
+                btn.disabled = false;
+            });
+        };
+    });
 </script>
-
 </body>
 </html>
