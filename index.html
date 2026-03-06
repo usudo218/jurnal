@@ -3,137 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jurnal Harian Pak Agus</title>
+    <title>Input Jurnal Pak Agus</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        body { background-color: #f0f2f5; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .container { max-width: 500px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .header-title { color: #0d6efd; font-weight: bold; text-align: center; margin-bottom: 25px; }
-        #preview { width: 100%; border-radius: 12px; display: none; margin-top: 15px; border: 2px solid #eee; }
-        .btn-primary { padding: 12px; font-weight: bold; border-radius: 10px; transition: 0.3s; }
-        .loading-text { display: none; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 30px 15px; }
+        .card { border: none; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; }
+        .card-header { background: #0d6efd; color: white; text-align: center; padding: 25px; border: none; }
+        .btn-primary { background: #0d6efd; border: none; padding: 12px; border-radius: 10px; font-weight: 600; }
+        .btn-outline-secondary { border-radius: 10px; padding: 10px; font-weight: 500; }
+        #preview { width: 100%; border-radius: 15px; display: none; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h3 class="header-title">Jurnal Pak Cokro</h3>
-    
-    <form id="formJurnal">
-        <div class="mb-3">
-            <label class="form-label fw-bold">Tanggal Kegiatan</label>
-            <input type="date" class="form-control" id="tanggal" required>
+<div class="container" style="max-width: 500px;">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Jurnal Harian Pak Cokro</h4>
+            <small>Sistem Informasi Kegiatan Digital</small>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Uraian Kegiatan</label>
-            <textarea class="form-control" id="uraian" rows="3" placeholder="Apa yang Anda kerjakan hari ini?" required></textarea>
+        <div class="card-body p-4">
+            <form id="formJurnal">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">📅 Tanggal</label>
+                    <input type="date" class="form-control form-control-lg" id="tanggal" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">📝 Uraian Kegiatan</label>
+                    <textarea class="form-control" id="uraian" rows="3" placeholder="Deskripsikan kegiatan..." required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">📸 Bukti Foto</label>
+                    <input type="file" class="form-control" id="foto" accept="image/*" capture="camera" onchange="previewImg(this)" required>
+                    <img id="preview">
+                </div>
+                <button type="submit" id="btnSimpan" class="btn btn-primary w-100 mb-3">🚀 Kirim Jurnal</button>
+                <a href="laporan.html" class="btn btn-outline-secondary w-100 text-decoration-none text-center">📊 Lihat Laporan</a>
+            </form>
+            <div id="status" class="mt-3 text-center fw-bold"></div>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Ambil Foto Bukti</label>
-            <input type="file" class="form-control" id="foto" accept="image/*" capture="camera" onchange="tampilkanPreview(this)" required>
-            <img id="preview" src="#" alt="Preview">
-        </div>
-
-        <button type="submit" id="btnSimpan" class="btn btn-primary w-100">
-            <span id="btnText">Kirim ke Google Sheets</span>
-        </button>
-    </form>
-
-    <div id="status" class="mt-3 text-center fw-bold"></div>
+    </div>
 </div>
 
 <script>
-    // --- PENGATURAN ---
-    // GANTI DENGAN URL WEB APP APPS SCRIPT ANDA (/exec)
-    const scriptURL = 'PASTE_URL_APPS_SCRIPT_ANDA_DI_SINI';
-
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxbUW5ce80CjkMrk3X8xSCcfXfGI1p-6s4_aBUJkz-cSVLQ2FyCkJxZvzCfYF4yBY24/exec';
     const form = document.getElementById('formJurnal');
-    const btn = document.getElementById('btnSimpan');
-    const btnText = document.getElementById('btnText');
-    const status = document.getElementById('status');
-    const preview = document.getElementById('preview');
 
-    // Menampilkan preview gambar
-    function tampilkanPreview(input) {
+    function previewImg(input) {
+        const pre = document.getElementById('preview');
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = e => {
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            };
+            reader.onload = e => { pre.src = e.target.result; pre.style.display = 'block'; };
             reader.readAsDataURL(input.files[0]);
         }
     }
 
     form.addEventListener('submit', e => {
         e.preventDefault();
-        
+        const btn = document.getElementById('btnSimpan');
+        const status = document.getElementById('status');
         const file = document.getElementById('foto').files[0];
-        if (!file) return;
-
+        
         btn.disabled = true;
-        btnText.innerText = "⚡ Mengompres & Mengirim...";
-        status.innerText = "";
+        status.innerText = "⏳ Sedang memproses...";
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = function(event) {
             const img = new Image();
             img.src = event.target.result;
-            
             img.onload = function() {
-                // --- PROSES KOMPRESI ---
                 const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Batasi lebar maksimal 800px (agar ringan tapi tetap tajam)
                 const MAX_WIDTH = 800;
-                const scaleSize = MAX_WIDTH / img.width;
+                const scale = MAX_WIDTH / img.width;
                 canvas.width = MAX_WIDTH;
-                canvas.height = img.height * scaleSize;
-
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.height = img.height * scale;
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                 
-                // Mengubah ke JPEG dengan kualitas 70%
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-
                 const payload = {
                     tanggal: document.getElementById('tanggal').value,
                     uraian: document.getElementById('uraian').value,
-                    data: compressedBase64,
+                    data: canvas.toDataURL('image/jpeg', 0.7).split(',')[1],
                     type: 'image/jpeg',
                     name: file.name
                 };
 
-                // Kirim data ke Google Apps Script
-                fetch(scriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                })
+                fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) })
                 .then(res => res.text())
                 .then(msg => {
                     status.className = "mt-3 text-center fw-bold text-success";
                     status.innerText = msg;
                     form.reset();
-                    preview.style.display = 'none';
-                    resetButton();
-                })
-                .catch(err => {
-                    status.className = "mt-3 text-center fw-bold text-danger";
-                    status.innerText = "❌ Gagal: Cek koneksi atau URL Script";
-                    resetButton();
+                    document.getElementById('preview').style.display = 'none';
+                    btn.disabled = false;
                 });
             };
         };
     });
-
-    function resetButton() {
-        btn.disabled = false;
-        btnText.innerText = "Kirim ke Google Sheets";
-    }
 </script>
-
 </body>
 </html>
