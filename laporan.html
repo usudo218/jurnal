@@ -8,40 +8,38 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { background: #f0f2f5; padding: 20px; font-family: 'Segoe UI', sans-serif; }
-        .card-report { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .img-doc { width: 120px; height: auto; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; transition: 0.2s; }
-        .img-doc:hover { transform: scale(1.05); }
-        .table thead { background: #212529; color: white; }
+        body { background: #f8f9fa; padding: 20px; }
+        .table-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .img-report { width: 120px; height: auto; border-radius: 5px; border: 1px solid #ddd; }
         @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
 
 <div class="container-fluid">
-    <div class="card-report">
+    <div class="table-container">
         <h3 class="text-center mb-4">Laporan Jurnal Harian</h3>
         
         <div class="d-flex gap-2 mb-4 no-print justify-content-center">
             <button onclick="exportExcel()" class="btn btn-success fw-bold">Excel</button>
             <button onclick="exportPDF()" class="btn btn-danger fw-bold">PDF</button>
-            <button onclick="muatData()" class="btn btn-outline-primary">Refresh</button>
+            <button onclick="loadData()" class="btn btn-outline-primary">Refresh</button>
             <a href="index.html" class="btn btn-secondary">Kembali</a>
         </div>
 
-        <div id="captureArea">
-            <table class="table table-bordered align-middle" id="tableJurnal">
-                <thead class="text-center">
+        <div id="areaLaporan">
+            <table class="table table-bordered align-middle" id="tabelData">
+                <thead class="table-dark text-center">
                     <tr>
                         <th width="50">No</th>
-                        <th width="150">Tanggal</th>
+                        <th width="120">Tanggal</th>
                         <th>Kegiatan</th>
                         <th width="150">Dokumen</th>
-                        <th width="100">Link</th>
+                        <th width="80">Link</th>
                     </tr>
                 </thead>
                 <tbody id="isiTabel">
-                    <tr><td colspan="5" class="text-center">Menghubungkan ke database...</td></tr>
+                    <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -49,57 +47,50 @@
 </div>
 
 <script>
-    // GANTI DENGAN URL WEB APP ANDA
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxbUW5ce80CjkMrk3X8xSCcfXfGI1p-6s4_aBUJkz-cSVLQ2FyCkJxZvzCfYF4yBY24/exec';
 
-    async function muatData() {
-        const tableBody = document.getElementById('isiTabel');
+    async function loadData() {
         try {
             const response = await fetch(scriptURL + '?action=read');
             const data = await response.json();
-            
             let html = "";
-            if (data.length === 0) {
-                html = "<tr><td colspan='5' class='text-center'>Data kosong.</td></tr>";
-            } else {
-                data.forEach((row, index) => {
-                    // Format tanggal (Asumsi kolom A adalah tanggal)
-                    let tgl = row[0] ? new Date(row[0]).toLocaleDateString('id-ID') : '-';
-                    
-                    html += `<tr>
-                        <td class="text-center">${index + 1}</td>
-                        <td class="text-center">${tgl}</td>
-                        <td>${row[1]}</td>
-                        <td class="text-center">
-                            <img src="${row[2]}" class="img-doc" 
-                                 onclick="window.open('${row[2]}')" 
-                                 onerror="this.src='https://via.placeholder.com/120x80?text=Gambar+Privat'">
-                        </td>
-                        <td class="text-center">
-                            <a href="${row[2]}" target="_blank" class="btn btn-sm btn-link text-decoration-none">Lihat</a>
-                        </td>
-                    </tr>`;
-                });
-            }
-            tableBody.innerHTML = html;
+            
+            data.forEach((row, index) => {
+                let tgl = row[0] ? new Date(row[0]).toLocaleDateString('id-ID') : '-';
+                html += `<tr>
+                    <td class="text-center">${index + 1}</td>
+                    <td class="text-center">${tgl}</td>
+                    <td>${row[1]}</td>
+                    <td class="text-center">
+                        <img src="${row[2]}" class="img-report" crossorigin="anonymous">
+                    </td>
+                    <td class="text-center"><a href="${row[2]}" target="_blank" class="btn btn-sm btn-link">Lihat</a></td>
+                </tr>`;
+            });
+            document.getElementById('isiTabel').innerHTML = html;
         } catch (err) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Gagal mengambil data: ${err}</td></tr>`;
+            document.getElementById('isiTabel').innerHTML = "<tr><td colspan='5'>Gagal memuat data.</td></tr>";
         }
     }
 
-    muatData();
+    loadData();
 
-    function exportExcel() { 
-        XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("tableJurnal")), "Laporan_Jurnal_PakCokro.xlsx"); 
+    function exportExcel() {
+        const table = document.getElementById("tabelData");
+        const wb = XLSX.utils.table_to_book(table);
+        XLSX.writeFile(wb, "Laporan_PakCokro.xlsx");
     }
-    
+
     function exportPDF() {
-        const element = document.getElementById('captureArea');
-        html2pdf().from(element).set({
+        const element = document.getElementById('areaLaporan');
+        const opt = {
             margin: 0.3,
-            filename: 'Laporan_Jurnal_PakCokro.pdf',
-            jsPDF: { orientation: 'landscape', unit: 'in', format: 'a4' }
-        }).save();
+            filename: 'Laporan_PakCokro.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true }, // useCORS penting agar gambar muncul di PDF
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
     }
 </script>
 </body>
