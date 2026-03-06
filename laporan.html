@@ -8,35 +8,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { background: #f8f9fa; padding: 20px; }
-        .card { border-radius: 15px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .img-table { width: 80px; height: auto; border-radius: 5px; cursor: pointer; }
+        body { background: #f0f2f5; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+        .card-report { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .img-doc { width: 120px; height: auto; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; transition: 0.2s; }
+        .img-doc:hover { transform: scale(1.05); }
+        .table thead { background: #212529; color: white; }
         @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
 
 <div class="container-fluid">
-    <div class="card p-4">
+    <div class="card-report">
         <h3 class="text-center mb-4">Laporan Jurnal Harian</h3>
-        <div class="d-flex gap-2 mb-4 no-print">
-            <button onclick="exportExcel()" class="btn btn-success">Excel</button>
-            <button onclick="exportPDF()" class="btn btn-danger">PDF</button>
-            <a href="index.html" class="btn btn-primary">Kembali</a>
+        
+        <div class="d-flex gap-2 mb-4 no-print justify-content-center">
+            <button onclick="exportExcel()" class="btn btn-success fw-bold">Excel</button>
+            <button onclick="exportPDF()" class="btn btn-danger fw-bold">PDF</button>
+            <button onclick="muatData()" class="btn btn-outline-primary">Refresh</button>
+            <a href="index.html" class="btn btn-secondary">Kembali</a>
         </div>
-        <div id="printArea">
-            <table class="table table-bordered align-middle" id="tableData">
-                <thead class="table-dark text-center">
+
+        <div id="captureArea">
+            <table class="table table-bordered align-middle" id="tableJurnal">
+                <thead class="text-center">
                     <tr>
-                        <th>No</th>
-                        <th>Tanggal</th>
+                        <th width="50">No</th>
+                        <th width="150">Tanggal</th>
                         <th>Kegiatan</th>
-                        <th>Dokumen</th>
-                        <th>Link</th>
+                        <th width="150">Dokumen</th>
+                        <th width="100">Link</th>
                     </tr>
                 </thead>
-                <tbody id="contentBody">
-                    <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
+                <tbody id="isiTabel">
+                    <tr><td colspan="5" class="text-center">Menghubungkan ke database...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -44,27 +49,58 @@
 </div>
 
 <script>
+    // GANTI DENGAN URL WEB APP ANDA
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxbUW5ce80CjkMrk3X8xSCcfXfGI1p-6s4_aBUJkz-cSVLQ2FyCkJxZvzCfYF4yBY24/exec';
 
-    async function loadData() {
-        const res = await fetch(scriptURL + '?action=read');
-        const data = await res.json();
-        let html = "";
-        data.forEach((row, i) => {
-            html += `<tr>
-                <td class="text-center">${i+1}</td>
-                <td>${new Date(row[0]).toLocaleDateString('id-ID')}</td>
-                <td>${row[1]}</td>
-                <td class="text-center"><img src="${row[2]}" class="img-table" onclick="window.open('${row[2]}')"></td>
-                <td class="small text-break"><a href="${row[2]}" target="_blank">Lihat Original</a></td>
-            </tr>`;
-        });
-        document.getElementById('contentBody').innerHTML = html;
+    async function muatData() {
+        const tableBody = document.getElementById('isiTabel');
+        try {
+            const response = await fetch(scriptURL + '?action=read');
+            const data = await response.json();
+            
+            let html = "";
+            if (data.length === 0) {
+                html = "<tr><td colspan='5' class='text-center'>Data kosong.</td></tr>";
+            } else {
+                data.forEach((row, index) => {
+                    // Format tanggal (Asumsi kolom A adalah tanggal)
+                    let tgl = row[0] ? new Date(row[0]).toLocaleDateString('id-ID') : '-';
+                    
+                    html += `<tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td class="text-center">${tgl}</td>
+                        <td>${row[1]}</td>
+                        <td class="text-center">
+                            <img src="${row[2]}" class="img-doc" 
+                                 onclick="window.open('${row[2]}')" 
+                                 onerror="this.src='https://via.placeholder.com/120x80?text=Gambar+Privat'">
+                        </td>
+                        <td class="text-center">
+                            <a href="${row[2]}" target="_blank" class="btn btn-sm btn-link text-decoration-none">Lihat</a>
+                        </td>
+                    </tr>`;
+                });
+            }
+            tableBody.innerHTML = html;
+        } catch (err) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Gagal mengambil data: ${err}</td></tr>`;
+        }
     }
-    loadData();
 
-    function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("tableData")), "Jurnal_PakCokro.xlsx"); }
-    function exportPDF() { html2pdf().from(document.getElementById('printArea')).set({margin: 0.5, filename:'Jurnal_PakCokro.pdf', jsPDF:{orientation:'landscape'}}).save(); }
+    muatData();
+
+    function exportExcel() { 
+        XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("tableJurnal")), "Laporan_Jurnal_PakCokro.xlsx"); 
+    }
+    
+    function exportPDF() {
+        const element = document.getElementById('captureArea');
+        html2pdf().from(element).set({
+            margin: 0.3,
+            filename: 'Laporan_Jurnal_PakCokro.pdf',
+            jsPDF: { orientation: 'landscape', unit: 'in', format: 'a4' }
+        }).save();
+    }
 </script>
 </body>
 </html>
