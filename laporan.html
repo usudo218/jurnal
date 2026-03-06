@@ -3,14 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Jurnal</title>
+    <title>Laporan Jurnal Pak Cokro</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { background: #f8f9fa; padding: 20px; }
-        .table-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .img-report { width: 120px; height: auto; border-radius: 5px; border: 1px solid #ddd; }
+        .table-container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Mengatur gambar agar besar dan tajam */
+        .img-report { 
+            width: 220px; /* Ukuran diperbesar sesuai permintaan */
+            height: auto; 
+            border-radius: 8px; 
+            border: 1px solid #ddd;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Memastikan tabel rapi dengan gambar besar */
+        table { table-layout: fixed; width: 100%; }
+        td { word-wrap: break-word; vertical-align: middle !important; }
+        
         @media print { .no-print { display: none; } }
     </style>
 </head>
@@ -21,10 +36,10 @@
         <h3 class="text-center mb-4">Laporan Jurnal Harian</h3>
         
         <div class="d-flex gap-2 mb-4 no-print justify-content-center">
-            <button onclick="exportExcel()" class="btn btn-success fw-bold">Excel</button>
-            <button onclick="exportPDF()" class="btn btn-danger fw-bold">PDF</button>
-            <button onclick="loadData()" class="btn btn-outline-primary">Refresh</button>
-            <a href="index.html" class="btn btn-secondary">Kembali</a>
+            <button onclick="exportExcel()" class="btn btn-success fw-bold">📥 Simpan Excel</button>
+            <button onclick="exportPDF()" class="btn btn-danger fw-bold">📄 Simpan PDF</button>
+            <button onclick="loadData()" class="btn btn-outline-primary fw-bold">🔄 Refresh</button>
+            <a href="index.html" class="btn btn-secondary fw-bold">Kembali</a>
         </div>
 
         <div id="areaLaporan">
@@ -34,12 +49,11 @@
                         <th width="50">No</th>
                         <th width="120">Tanggal</th>
                         <th>Kegiatan</th>
-                        <th width="150">Dokumen</th>
-                        <th width="80">Link</th>
+                        <th width="250">Dokumen</th> <th width="100">Link</th>
                     </tr>
                 </thead>
                 <tbody id="isiTabel">
-                    <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
+                    <tr><td colspan="5" class="text-center">Memuat data dari Google Sheets...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -47,47 +61,56 @@
 </div>
 
 <script>
+    // URL Web App Pak Cokro
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxbUW5ce80CjkMrk3X8xSCcfXfGI1p-6s4_aBUJkz-cSVLQ2FyCkJxZvzCfYF4yBY24/exec';
 
     async function loadData() {
+        const tableBody = document.getElementById('isiTabel');
         try {
             const response = await fetch(scriptURL + '?action=read');
             const data = await response.json();
             let html = "";
             
-            data.forEach((row, index) => {
-                let tgl = row[0] ? new Date(row[0]).toLocaleDateString('id-ID') : '-';
-                html += `<tr>
-                    <td class="text-center">${index + 1}</td>
-                    <td class="text-center">${tgl}</td>
-                    <td>${row[1]}</td>
-                    <td class="text-center">
-                        <img src="${row[2]}" class="img-report" crossorigin="anonymous">
-                    </td>
-                    <td class="text-center"><a href="${row[2]}" target="_blank" class="btn btn-sm btn-link">Lihat</a></td>
-                </tr>`;
-            });
-            document.getElementById('isiTabel').innerHTML = html;
+            if (data.length === 0) {
+                html = "<tr><td colspan='5' class='text-center'>Data masih kosong.</td></tr>";
+            } else {
+                data.forEach((row, index) => {
+                    let tgl = row[0] ? new Date(row[0]).toLocaleDateString('id-ID') : '-';
+                    html += `<tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td class="text-center">${tgl}</td>
+                        <td>${row[1]}</td>
+                        <td class="text-center">
+                            <img src="${row[2]}" class="img-report" crossorigin="anonymous" onerror="this.src='https://via.placeholder.com/220x150?text=Gambar+Privat'">
+                        </td>
+                        <td class="text-center small">
+                            <a href="${row[2]}" target="_blank" class="btn btn-sm btn-link text-decoration-none">Lihat Asli</a>
+                        </td>
+                    </tr>`;
+                });
+            }
+            tableBody.innerHTML = html;
         } catch (err) {
-            document.getElementById('isiTabel').innerHTML = "<tr><td colspan='5'>Gagal memuat data.</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan='5' class='text-center text-danger'>Gagal memuat data. Pastikan Apps Script sudah di-deploy sebagai 'Anyone'.</td></tr>";
         }
     }
 
+    // Jalankan fungsi saat halaman dibuka
     loadData();
 
     function exportExcel() {
         const table = document.getElementById("tabelData");
         const wb = XLSX.utils.table_to_book(table);
-        XLSX.writeFile(wb, "Laporan_PakCokro.xlsx");
+        XLSX.writeFile(wb, "Laporan_Jurnal_PakCokro.xlsx");
     }
 
     function exportPDF() {
         const element = document.getElementById('areaLaporan');
         const opt = {
-            margin: 0.3,
-            filename: 'Laporan_PakCokro.pdf',
+            margin: 0.2,
+            filename: 'Laporan_Jurnal_PakCokro.pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true }, // useCORS penting agar gambar muncul di PDF
+            html2canvas: { scale: 2, useCORS: true, logging: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
         };
         html2pdf().set(opt).from(element).save();
