@@ -59,6 +59,7 @@
 <footer><div class="container text-center text-white small">&copy; 2026 Informatika</div></footer>
 
 <script>
+    if(localStorage.getItem('isAuth') !== 'true') location.href = "index.html";
     if(localStorage.getItem('informatika_login') !== 'true') location.href = "index.html";
     function handleLogout() { localStorage.removeItem('informatika_login'); location.href = "index.html"; }
 
