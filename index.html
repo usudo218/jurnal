@@ -7,97 +7,86 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f0f2f5; font-family: 'Inter', sans-serif; }
-        .login-card { max-width: 400px; margin: 100px auto; border-radius: 15px; border: none; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .hidden { display: none !important; }
-        .card { border-radius: 12px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .table thead { background-color: #f8f9fa; }
+        .bg-primary { background-color: #0d6efd !important; }
     </style>
 </head>
 <body>
 
-<!-- HALAMAN LOGIN -->
-<div id="loginPage" class="container">
-    <div class="card login-card p-4 text-center">
-        <h3 class="fw-bold mb-4 text-primary">E-JURNAL</h3>
-        <div class="mb-3 text-start">
-            <label class="form-label fw-semibold">Password Akses</label>
-            <input type="password" id="passInput" class="form-control" placeholder="Masukkan password">
+<!-- LOGIN -->
+<div id="loginPage" class="container mt-5">
+    <div class="card p-4 mx-auto" style="max-width: 400px;">
+        <h4 class="text-center fw-bold text-primary mb-4">E-JURNAL LOGIN</h4>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Password</label>
+            <input type="password" id="passInput" class="form-control" placeholder="agustjakra">
         </div>
-        <button onclick="handleLogin()" id="btnLogin" class="btn btn-primary w-100 fw-bold py-2">LOG IN</button>
+        <button onclick="handleLogin()" id="btnLogin" class="btn btn-primary w-100 fw-bold">MASUK</button>
     </div>
 </div>
 
-<!-- DASHBOARD UTAMA -->
+<!-- DASHBOARD -->
 <div id="mainDashboard" class="hidden">
-    <nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
+    <nav class="navbar navbar-dark bg-primary shadow mb-4">
         <div class="container">
-            <span class="navbar-brand fw-bold"><i class="bi bi-journal-check me-2"></i>E-JURNAL PAK COKRO</span>
-            <button class="btn btn-outline-light btn-sm" onclick="location.reload()">Logout</button>
+            <span class="navbar-brand fw-bold">PAK COKRO | E-JURNAL</span>
+            <button class="btn btn-light btn-sm fw-bold" onclick="location.reload()">LOGOUT</button>
         </div>
     </nav>
 
     <div class="container">
         <div class="row">
-            <!-- Sidebar -->
             <div class="col-md-3 mb-4">
                 <div class="list-group shadow-sm">
-                    <button onclick="showPage('jurnal')" class="list-group-item list-group-item-action active"><i class="bi bi-pencil-square me-2"></i>Isi Jurnal</button>
-                    <button onclick="showPage('nilai')" class="list-group-item list-group-item-action"><i class="bi bi-star me-2"></i>Input Nilai</button>
-                    <button onclick="showPage('rekap')" class="list-group-item list-group-item-action"><i class="bi bi-file-text me-2"></i>Rekap</button>
+                    <button class="list-group-item list-group-item-action active"><i class="bi bi-pencil-fill me-2"></i>Isi Jurnal</button>
+                    <button class="list-group-item list-group-item-action"><i class="bi bi-table me-2"></i>Input Nilai</button>
+                    <button class="list-group-item list-group-item-action"><i class="bi bi-graph-up me-2"></i>Rekap</button>
                 </div>
             </div>
 
-            <!-- Area Konten -->
             <div class="col-md-9">
-                <!-- Page: Jurnal -->
-                <div id="page-jurnal" class="content-page card p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2">Input Jurnal & Presensi</h5>
+                <div class="card p-4">
+                    <h5 class="fw-bold border-bottom pb-2 mb-4">Jurnal Harian & Presensi</h5>
                     
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">PILIH KELAS</label>
+                            <label class="form-label small fw-bold">PILIH KELAS</label>
                             <select id="pilihKelas" class="form-select" onchange="loadSiswa()">
                                 <option value="">-- Pilih Kelas --</option>
-                                <option value="10-1">10-1</option>
-                                <option value="10-2">10-2</option>
-                                <option value="10-3">10-3</option>
-                                <option value="10-4">10-4</option>
-                                <option value="10-5">10-5</option>
-                                <option value="10-6">10-6</option>
+                                <option value="10-1">10-1</option><option value="10-2">10-2</option>
+                                <option value="10-3">10-3</option><option value="10-4">10-4</option>
+                                <option value="10-5">10-5</option><option value="10-6">10-6</option>
                                 <option value="10-7">10-7</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">TANGGAL</label>
+                            <label class="form-label small fw-bold">TANGGAL</label>
                             <input type="date" id="tglInput" class="form-control">
                         </div>
                     </div>
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">KEGIATAN</label>
-                            <input type="text" id="kegiatanInput" class="form-control" placeholder="Contoh: KBM Tatap Muka">
+                            <label class="form-label small fw-bold">KEGIATAN</label>
+                            <input type="text" id="kegiatanInput" class="form-control" placeholder="Contoh: KBM">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">MATERI</label>
-                            <input type="text" id="materiInput" class="form-control" placeholder="Contoh: Struktur Atom">
+                            <label class="form-label small fw-bold">MATERI</label>
+                            <input type="text" id="materiInput" class="form-control" placeholder="Materi hari ini">
                         </div>
                     </div>
 
                     <div id="siswaContainer"></div>
                 </div>
-
-                <!-- Page Placeholder -->
-                <div id="page-nilai" class="content-page card p-4 hidden"><h5>Input Nilai</h5><p>Fitur segera hadir.</p></div>
-                <div id="page-rekap" class="content-page card p-4 hidden"><h5>Rekap Data</h5><p>Fitur segera hadir.</p></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw76IO_XLq6VJvxk2s6w8TSvv5v67n6yHU8bHQhOER5JKQNlg4Ezo3wsDacJgBSGD6m/exec"; // GANTI DENGAN URL DEPLOY ANDA
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhsoY16H-5oghQc69Oi1PC4RVSq1p2-xyMTYjIKqSsNMjbIwhhCoXOZ4YN9ZbrLv32/exec"; // <--- GANTI INI
 
     function handleLogin() {
         const pass = document.getElementById('passInput').value;
@@ -125,7 +114,7 @@
         const container = document.getElementById('siswaContainer');
         if(!kelas) { container.innerHTML = ''; return; }
 
-        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+        container.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>';
 
         fetch(SCRIPT_URL, {
             method: "POST",
@@ -134,32 +123,31 @@
         .then(res => res.json())
         .then(res => {
             if(res.data && res.data.length > 0) {
-                let html = `<table class="table table-hover border">
-                    <thead><tr><th>No</th><th>Nama Siswa</th><th width="120">Presensi</th></tr></thead><tbody>`;
+                let html = `<table class="table table-hover border mt-3">
+                    <thead class="table-light"><tr><th>No</th><th>Nama Siswa</th><th width="150">Presensi</th></tr></thead><tbody>`;
                 res.data.forEach((nama, i) => {
                     html += `<tr><td>${i+1}</td><td>${nama}</td>
-                        <td><select class="form-select form-select-sm sel-presensi">
+                        <td><select class="form-select form-select-sm sel-absen">
                             <option value="H">Hadir</option><option value="S">Sakit</option>
                             <option value="I">Izin</option><option value="A">Alpha</option>
                         </select></td></tr>`;
                 });
                 html += `</tbody></table>
-                    <button onclick="simpanJurnal()" id="btnSimpan" class="btn btn-success w-100 py-3 fw-bold mt-3">SIMPAN KE DATABASE</button>`;
+                    <button onclick="simpanKeSheet()" id="btnSimpan" class="btn btn-success w-100 py-3 fw-bold mt-3">SIMPAN JURNAL</button>`;
                 container.innerHTML = html;
             }
         });
     }
 
-    function simpanJurnal() {
+    function simpanKeSheet() {
         const btn = document.getElementById('btnSimpan');
-        btn.disabled = true;
-        btn.innerHTML = 'Menyimpan...';
+        btn.disabled = true; btn.innerHTML = 'Proses Menyimpan...';
 
-        const presensiElems = document.querySelectorAll('.sel-presensi');
+        const absensi = document.querySelectorAll('.sel-absen');
         let rekap = {H:0, S:0, I:0, A:0};
-        presensiElems.forEach(el => rekap[el.value]++);
-        
-        const data = {
+        absensi.forEach(el => rekap[el.value]++);
+
+        const payload = {
             action: "simpanJurnal",
             tanggal: document.getElementById('tglInput').value,
             kelas: "KELAS " + document.getElementById('pilihKelas').value,[cite: 1]
@@ -168,21 +156,14 @@
             rekapPresensi: `H:${rekap.H}, S:${rekap.S}, I:${rekap.I}, A:${rekap.A}`
         };
 
-        fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(data) })
+        fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) })
         .then(res => res.json())
         .then(res => {
             if(res.status === "success") {
-                alert("Jurnal Berhasil Disimpan!");
+                alert("Data berhasil masuk ke Spreadsheet!");
                 location.reload();
             }
         });
-    }
-
-    function showPage(id) {
-        document.querySelectorAll('.content-page').forEach(p => p.classList.add('hidden'));
-        document.querySelectorAll('.list-group-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('page-' + id).classList.remove('hidden');
-        event.currentTarget.classList.add('active');
     }
 </script>
 </body>
