@@ -8,10 +8,11 @@
     <style>
         body { background: #f4f7f6; min-height: 100vh; display: flex; flex-direction: column; }
         footer { margin-top: auto; background: #212529; color: white; padding: 15px 0; }
-        .inp-n { width: 55px; text-align: center; }
+        .inp-n { width: 60px; text-align: center; }
     </style>
 </head>
 <body>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
     <div class="container">
         <a class="navbar-brand fw-bold" href="index.html">INFORMATIKA</a>
@@ -26,84 +27,160 @@
 
 <div class="container">
     <div class="card p-4 shadow-sm mb-4">
-        <h5 class="fw-bold mb-4">Input Nilai</h5>
+        <h5 class="fw-bold mb-4">Input Nilai Siswa</h5>
+
         <select id="pilihKelas" class="form-select w-50 mb-3" onchange="loadSiswa()">
             <option value="">-- Pilih Kelas --</option>
-            <option value="10-1">10-1</option><option value="10-2">10-2</option>
-            <option value="10-3">10-3</option><option value="10-4">10-4</option>
-            <option value="10-5">10-5</option><option value="10-6">10-6</option>
+            <option value="10-1">10-1</option>
+            <option value="10-2">10-2</option>
+            <option value="10-3">10-3</option>
+            <option value="10-4">10-4</option>
+            <option value="10-5">10-5</option>
+            <option value="10-6">10-6</option>
             <option value="10-7">10-7</option>
         </select>
+
         <div id="contNilai" class="table-responsive"></div>
     </div>
 </div>
-<footer class="text-center"><small>&copy; 2026 Informatika</small></footer>
+
+<footer class="text-center">
+    <small>&copy; 2026 Informatika</small>
+</footer>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhZM9iVVKIu0eywehfX3evZB3FNj__kS89NmrJFjy_w6aBjEGfTCsvPXQzuJIDKbRC/exec";
-    if(localStorage.getItem('isAuth') !== 'true') location.href = "index.html";
-    function logout() { localStorage.removeItem('isAuth'); location.href = "index.html"; }
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhZM9iVVKIu0eywehfX3evZB3FNj__kS89NmrJFjy_w6aBjEGfTCsvPXQzuJIDKbRC/exec";
 
-    function loadSiswa() {
-        const k = document.getElementById('pilihKelas').value;
-        if(!k) return;
-        fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getSiswa", kelas: "KELAS " + k }) })
-        .then(res => res.json()).then(res => {
-            let h = `<table class="table table-sm table-bordered"><thead><tr><th>Nama</th><th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>UH</th><th>STS</th><th>SAS</th></tr></thead><tbody>`;
-            res.data.forEach(n => {
-                h += `<tr><td class="nama-s">${n}</td>
-                    <td><input type="number" class="inp-n"></td><td><input type="number" class="inp-n"></td>
-                    <td><input type="number" class="inp-n"></td><td><input type="number" class="inp-n"></td>
-                    <td><input type="number" class="inp-n"></td><td><input type="number" class="inp-n"></td>
-                    <td><input type="number" class="inp-n"></td></tr>`;
-            });
-            h += `</tbody></table><button onclick="simpanNilai()" id="btnS" class="btn btn-warning w-100">SIMPAN NILAI</button>`;
-            document.getElementById('contNilai').innerHTML = h;
+// 🔐 CEK LOGIN
+if(localStorage.getItem('isAuth') !== 'true') location.href = "index.html";
+
+function logout() {
+    localStorage.removeItem('isAuth');
+    location.href = "index.html";
+}
+
+// 📥 LOAD SISWA
+function loadSiswa() {
+    const kelas = document.getElementById('pilihKelas').value;
+    const cont = document.getElementById('contNilai');
+
+    if(!kelas) return;
+
+    cont.innerHTML = "Memuat data siswa...";
+
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "getSiswa",
+            kelas: "KELAS " + kelas
+        })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status !== "success") {
+            cont.innerHTML = "Gagal mengambil data";
+            return;
+        }
+
+        let html = `
+        <table class="table table-bordered table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Nama</th>
+                    <th>H1</th>
+                    <th>H2</th>
+                    <th>H3</th>
+                    <th>H4</th>
+                    <th>UH</th>
+                    <th>STS</th>
+                    <th>SAS</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        res.data.forEach(nama => {
+            html += `
+            <tr>
+                <td class="nama-s">${nama}</td>
+                <td><input type="number" class="form-control inp-n"></td>
+                <td><input type="number" class="form-control inp-n"></td>
+                <td><input type="number" class="form-control inp-n"></td>
+                <td><input type="number" class="form-control inp-n"></td>
+                <td><input type="number" class="form-control inp-n"></td>
+                <td><input type="number" class="form-control inp-n"></td>
+                <td><input type="number" class="form-control inp-n"></td>
+            </tr>
+            `;
         });
-    }
 
-    function simpanNilai() {
-    const btn = document.getElementById('btnS'); // Sesuaikan ID tombol Anda
+        html += `
+            </tbody>
+        </table>
+        <button onclick="simpanNilai()" id="btnSimpan" class="btn btn-warning w-100 fw-bold">
+            SIMPAN NILAI
+        </button>
+        `;
+
+        cont.innerHTML = html;
+    })
+    .catch(() => {
+        cont.innerHTML = "Terjadi kesalahan koneksi";
+    });
+}
+
+// 💾 SIMPAN NILAI
+function simpanNilai() {
+    const btn = document.getElementById('btnSimpan');
     const kelas = document.getElementById('pilihKelas').value;
     const rows = document.querySelectorAll('tbody tr');
+
     let payload = [];
 
     btn.disabled = true;
-    btn.innerHTML = "Sedang Menyimpan...";
+    btn.innerHTML = "Menyimpan...";
 
     rows.forEach(tr => {
         const inputs = tr.querySelectorAll('input');
+
         payload.push({
-            nama: tr.querySelector('.nama-s').innerText, // Pastikan kolom nama punya class 'nama-s'
+            nama: tr.querySelector('.nama-s').innerText,
             kelas: "KELAS " + kelas,
-            h1: inputs[0].value, h2: inputs[1].value, h3: inputs[2].value, h4: inputs[3].value,
-            uh: inputs[4].value, sts: inputs[5].value, sas: inputs[6].value
+            h1: inputs[0].value,
+            h2: inputs[1].value,
+            h3: inputs[2].value,
+            h4: inputs[3].value,
+            uh: inputs[4].value,
+            sts: inputs[5].value,
+            sas: inputs[6].value
         });
     });
 
-    fetch(SCRIPT_URL, { 
-        method: "POST", 
-        body: JSON.stringify({ action: "simpanNilai", payload: payload }) 
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "simpanNilai",
+            payload: payload
+        })
     })
     .then(res => res.json())
     .then(res => {
         if(res.status === "success") {
-            alert("Nilai Kelas " + kelas + " Berhasil Disimpan!");
+            alert("✅ Nilai berhasil disimpan!");
             location.reload();
+        } else {
+            alert("❌ Gagal menyimpan");
+            btn.disabled = false;
+            btn.innerHTML = "SIMPAN NILAI";
         }
     })
-    .catch(err => {
-        alert("Terjadi kesalahan koneksi ke server!");
+    .catch(() => {
+        alert("❌ Error koneksi!");
         btn.disabled = false;
         btn.innerHTML = "SIMPAN NILAI";
     });
 }
-
-        fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "simpanNilai", payload: payload }) })
-        .then(res => res.json()).then(res => {
-            if(res.status === "success") { alert("Tersimpan!"); location.reload(); }
-        });
-    }
 </script>
+
 </body>
 </html>
