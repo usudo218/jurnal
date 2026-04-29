@@ -9,14 +9,15 @@
     <style>
         body { background: #f4f7f6; min-height: 100vh; display: flex; flex-direction: column; }
         footer { margin-top: auto; background: #212529; color: white; padding: 20px 0; }
-        input[type=number] { width: 60px; text-align: center; }
+        /* Ukuran input nilai agar lebih rapi */
+        .inp-nilai { width: 60px; text-align: center; margin: 0 auto; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="index.html">INFORMATIKA</a>
+        <a class="navbar-brand fw-bold" href="index.html"><i class="bi bi-cpu-fill me-2"></i>INFORMATIKA</a>
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="index.html">Jurnal</a>
             <a class="nav-link active" href="nilai.html">Nilai</a>
@@ -28,7 +29,7 @@
 
 <div class="container">
     <div class="card p-4 shadow-sm mb-4">
-        <h5 class="fw-bold mb-4">Input Nilai Siswa</h5>
+        <h5 class="fw-bold mb-4 border-bottom pb-2">Input Nilai Siswa</h5>
         <select id="pilihKelas" class="form-select w-50 mb-4" onchange="loadSiswa()">
             <option value="">-- Pilih Kelas --</option>
             <option value="10-1">10-1</option><option value="10-2">10-2</option>
@@ -41,38 +42,95 @@
     <a href="index.html" class="btn btn-secondary mb-4"><i class="bi bi-arrow-left me-2"></i>Kembali</a>
 </div>
 
-<footer class="text-center"><small>&copy; 2026 Informatika</small></footer>
+<footer class="text-center"><small>&copy; 2026 Informatika | Manajemen Nilai</small></footer>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwDNW13G8Wr53QwYhkpzoz491KeydqVyw7VOUEaG33f-8ibGpzrXW6zRyqBnoYC6O0u/exec"; 
+    
+    // Proteksi Halaman
     if(localStorage.getItem('isAuth') !== 'true') location.href = "index.html";
 
-    function logout() { localStorage.removeItem('isAuth'); location.href = "index.html"; }
+    function logout() { 
+        localStorage.removeItem('isAuth'); 
+        location.href = "index.html"; 
+    }
 
     function loadSiswa() {
         const kelas = document.getElementById('pilihKelas').value;
         const cont = document.getElementById('contNilai');
         if(!kelas) return;
-        cont.innerHTML = "Memuat...";
+        cont.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary"></div><p>Memuat Siswa...</p></div>';
 
         fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "getSiswa", kelas: "KELAS " + kelas }) })
         .then(res => res.json()).then(res => {
-            let h = `<table class="table table-bordered align-middle">
+            let h = `<table class="table table-bordered align-middle table-sm">
                 <thead class="table-dark text-center">
                     <tr><th>No</th><th>Nama</th><th>H1</th><th>H2</th><th>H3</th><th>H4</th><th>UH</th><th>STS</th><th>SAS</th></tr>
                 </thead><tbody>`;
             res.data.forEach((n, i) => {
-                h += `<tr><td class="text-center">${i+1}</td><td>${n}</td>
-                    <td><input type="number" class="form-control form-control-sm"></td>
-                    <td><input type="number" class="form-control form-control-sm"></td>
-                    <td><input type="number" class="form-control form-control-sm"></td>
-                    <td><input type="number" class="form-control form-control-sm"></td>
-                    <td><input type="number" class="form-control form-control-sm"></td>
-                    <td><input type="number" class="form-control form-control-sm"></td>
-                    <td><input type="number" class="form-control form-control-sm"></td></tr>`;
+                h += `<tr>
+                    <td class="text-center">${i+1}</td>
+                    <td class="nama-siswa">${n}</td>
+                    <td><input type="number" class="form-control form-control-sm inp-nilai"></td>
+                    <td><input type="number" class="form-control form-control-sm inp-nilai"></td>
+                    <td><input type="number" class="form-control form-control-sm inp-nilai"></td>
+                    <td><input type="number" class="form-control form-control-sm inp-nilai"></td>
+                    <td><input type="number" class="form-control form-control-sm inp-nilai"></td>
+                    <td><input type="number" class="form-control form-control-sm inp-nilai"></td>
+                    <td><input type="number" class="form-control form-control-sm inp-nilai"></td>
+                </tr>`;
             });
-            h += `</tbody></table><button class="btn btn-warning w-100 fw-bold">SIMPAN NILAI</button>`;
+            h += `</tbody></table>
+            <button onclick="simpanNilai()" id="btnSimpanNilai" class="btn btn-warning w-100 fw-bold py-3 mt-2">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i>SIMPAN NILAI KE SPREADSHEET
+            </button>`;
             cont.innerHTML = h;
+        });
+    }
+
+    function simpanNilai() {
+        const btn = document.getElementById('btnSimpanNilai');
+        const kelas = document.getElementById('pilihKelas').value;
+        const rows = document.querySelectorAll('#contNilai tbody tr');
+        let payload = [];
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
+
+        rows.forEach(tr => {
+            const inputs = tr.querySelectorAll('input');
+            payload.push({
+                nama: tr.querySelector('.nama-siswa').innerText,
+                kelas: "KELAS " + kelas,
+                h1: inputs[0].value,
+                h2: inputs[1].value,
+                h3: inputs[2].value,
+                h4: inputs[3].value,
+                uh: inputs[4].value,
+                sts: inputs[5].value,
+                sas: inputs[6].value
+            });
+        });
+
+        fetch(SCRIPT_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ action: "simpanNilai", payload: payload }) 
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.status === "success") {
+                alert("Nilai Kelas " + kelas + " Berhasil Disimpan!");
+                location.reload();
+            } else {
+                alert("Gagal menyimpan: " + res.msg);
+                btn.disabled = false;
+                btn.innerHTML = "SIMPAN NILAI";
+            }
+        })
+        .catch(err => {
+            alert("Terjadi kesalahan koneksi!");
+            btn.disabled = false;
+            btn.innerHTML = "SIMPAN NILAI";
         });
     }
 </script>
