@@ -4,110 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Jurnal Guru</title>
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
-        .login-container { max-width: 400px; margin-top: 100px; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .btn-primary { background-color: #2563eb; border: none; padding: 10px; }
-        .nav-link { cursor: pointer; }
-        .sidebar { background: #fff; min-height: 100vh; border-right: 1px solid #ddd; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .login-card { max-width: 400px; margin: 100px auto; border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
-        .status-badge { font-size: 0.8rem; padding: 5px 10px; border-radius: 20px; }
+        .nav-link { cursor: pointer; }
+        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
-<!-- LOGIN SECTION -->
-<div id="loginPage" class="container login-container">
-    <div class="card p-4">
-        <div class="text-center mb-4">
-            <i class="bi bi-person-badge-fill text-primary" style="font-size: 3rem;"></i>
-            <h4 class="fw-bold mt-2">Login Guru</h4>
-            <p class="text-muted small">Sistem Informasi Jurnal & Nilai</p>
+<!-- HALAMAN LOGIN -->
+<div id="loginPage" class="container">
+    <div class="card login-card p-4 text-center">
+        <i class="bi bi-person-circle text-primary" style="font-size: 4rem;"></i>
+        <h3 class="fw-bold mt-3">Login Guru</h3>
+        <p class="text-muted">Masukkan password untuk akses jurnal</p>
+        <div class="mb-3 text-start">
+            <label class="form-label">Password</label>
+            <input type="password" id="passInput" class="form-control form-control-lg" placeholder="••••••••">
         </div>
-        <div class="mb-3">
-            <label class="form-label">Password Akses</label>
-            <input type="password" id="passInput" class="form-control form-control-lg" placeholder="Masukkan Password">
-        </div>
-        <button onclick="attemptLogin()" id="btnLogin" class="btn btn-primary w-100 fw-bold">
-            MASUK <i class="bi bi-box-arrow-in-right ms-2"></i>
-        </button>
+        <button onclick="handleLogin()" id="btnLogin" class="btn btn-primary btn-lg w-100">MASUK</button>
     </div>
 </div>
 
-<!-- DASHBOARD SECTION (Hidden by default) -->
+<!-- DASHBOARD UTAMA -->
 <div id="mainDashboard" class="hidden">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <nav class="navbar navbar-dark bg-primary shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-journal-check me-2"></i>E-JURNAL</a>
-            <button class="btn btn-sm btn-light" onclick="logout()">Logout</button>
+            <span class="navbar-brand fw-bold"><i class="bi bi-journal-text me-2"></i>E-JURNAL PAK COKRO</span>
+            <button class="btn btn-light btn-sm" onclick="location.reload()">Logout</button>
         </div>
     </nav>
 
     <div class="container mt-4">
         <div class="row">
-            <!-- Sidebar / Menu Utama -->
+            <!-- Sidebar Menu -->
             <div class="col-md-3 mb-4">
-                <div class="card p-3">
-                    <h6 class="text-muted small fw-bold mb-3">MENU UTAMA</h6>
-                    <div class="list-group list-group-flush">
-                        <button onclick="showPage('jurnal')" class="list-group-item list-group-item-action border-0 py-3">
-                            <i class="bi bi-pencil-square me-2 text-primary"></i> Pengisian Jurnal
-                        </button>
-                        <button onclick="showPage('nilai')" class="list-group-item list-group-item-action border-0 py-3">
-                            <i class="bi bi-clipboard-data me-2 text-success"></i> Input Nilai Siswa
-                        </button>
-                        <button onclick="showPage('rekap')" class="list-group-item list-group-item-action border-0 py-3">
-                            <i class="bi bi-file-earmark-spreadsheet me-2 text-warning"></i> Rekap & Legger
-                        </button>
-                    </div>
+                <div class="list-group">
+                    <button onclick="showPage('jurnal')" class="list-group-item list-group-item-action active"><i class="bi bi-pencil-square me-2"></i>Isi Jurnal & Presensi</button>
+                    <button onclick="showPage('nilai')" class="list-group-item list-group-item-action"><i class="bi bi-star me-2"></i>Input Nilai Siswa</button>
+                    <button onclick="showPage('rekap')" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-bar-graph me-2"></i>Rekap & Legger</button>
                 </div>
             </div>
 
             <!-- Content Area -->
             <div class="col-md-9">
-                <!-- Page: Jurnal -->
+                <!-- Page Jurnal -->
                 <div id="page-jurnal" class="content-page card p-4">
-                    <h5 class="fw-bold mb-4">Pengisian Jurnal & Presensi</h5>
-                    <div class="row g-3">
+                    <h5 class="fw-bold"><i class="bi bi-calendar-check me-2"></i>Jurnal Harian</h5>
+                    <div class="row g-3 mt-2">
                         <div class="col-md-6">
-                            <label class="form-label">Pilih Kelas</label>
-                            <select id="pilihKelas" class="form-select">
+                            <label class="form-label small fw-bold">PILIH KELAS</label>
+                            <select id="pilihKelas" class="form-select" onchange="loadSiswa()">
                                 <option value="">-- Pilih Kelas --</option>
-                                <option>10-1</option><option>10-2</option><option>10-3</option>
-                                <option>10-4</option><option>10-5</option><option>10-6</option><option>10-7</option>
+                                <option value="10-1">10-1</option>
+                                <option value="10-2">10-2</option>
+                                <option value="10-3">10-3</option>
+                                <option value="10-4">10-4</option>
+                                <option value="10-5">10-5</option>
+                                <option value="10-6">10-6</option>
+                                <option value="10-7">10-7</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tanggal</label>
-                            <input type="date" id="tglJurnal" class="form-control">
+                            <label class="form-label small fw-bold">TANGGAL</label>
+                            <input type="date" id="tglInput" class="form-control">
                         </div>
                     </div>
-                    <hr>
-                    <div id="daftarSiswaContainer" class="mt-3">
-                        <p class="text-muted italic">Pilih kelas untuk menampilkan daftar siswa...</p>
+                    <div id="siswaContainer" class="mt-4">
+                        <!-- Tabel Siswa akan muncul di sini -->
                     </div>
                 </div>
 
-                <!-- Page: Nilai -->
-                <div id="page-nilai" class="content-page card p-4 hidden text-center">
-                    <i class="bi bi-tools mb-3 text-muted" style="font-size: 3rem;"></i>
-                    <h5>Fitur Input Nilai</h5>
-                    <p class="text-muted">Modul pengisian Harian, UH, STS, dan SAS sedang disiapkan.</p>
+                <!-- Page Nilai (Placeholder) -->
+                <div id="page-nilai" class="content-page card p-4 hidden">
+                    <h5 class="fw-bold">Input Nilai Siswa</h5>
+                    <p class="text-muted">Fitur nilai harian dan UH sedang dikembangkan.</p>
                 </div>
 
-                <!-- Page: Rekap -->
-                <div id="page-rekap" class="content-page card p-4 hidden text-center">
-                    <i class="bi bi-file-earmark-bar-graph mb-3 text-muted" style="font-size: 3rem;"></i>
-                    <h5>Rekapitulasi Data</h5>
-                    <p class="text-muted">Laporan legger dan jurnal akan muncul di sini.</p>
+                <!-- Page Rekap (Placeholder) -->
+                <div id="page-rekap" class="content-page card p-4 hidden">
+                    <h5 class="fw-bold">Rekapitulasi</h5>
+                    <p class="text-muted">Hasil rekap jurnal dan legger nilai.</p>
                 </div>
             </div>
         </div>
@@ -115,16 +96,15 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1RFFz_uVMV_n7rCAKNyVycutpsD99pMt22FSPTp1oP8wBnWYeO5JhfY8dZ5N_I8fd/exec";
+    // GANTI URL INI DENGAN URL WEB APP ANDA!
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5F-PhabDvTq7fUuYbQdj6j0_3wTq1Y1Kict6Q2DtaZ0LgN1tLi6Sk4a9aEffao5yS/exec"; 
 
-    function attemptLogin() {
+    function handleLogin() {
         const pass = document.getElementById('passInput').value;
         const btn = document.getElementById('btnLogin');
-        
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
         btn.disabled = true;
+        btn.innerHTML = 'Mengecek...';
 
-        // Simulasi POST ke Apps Script
         fetch(SCRIPT_URL, {
             method: "POST",
             body: JSON.stringify({ action: "login", password: pass })
@@ -136,25 +116,61 @@
                 document.getElementById('mainDashboard').classList.remove('hidden');
             } else {
                 alert("Password Salah!");
-                btn.innerHTML = 'MASUK <i class="bi bi-box-arrow-in-right ms-2"></i>';
                 btn.disabled = false;
+                btn.innerHTML = 'MASUK';
             }
-        }).catch(err => {
-            alert("Error Koneksi: Pastikan URL Apps Script Benar");
-            btn.innerHTML = 'MASUK <i class="bi bi-box-arrow-in-right ms-2"></i>';
+        }).catch(() => {
+            alert("Koneksi gagal/URL salah!");
             btn.disabled = false;
         });
     }
 
-    function showPage(pageId) {
-        document.querySelectorAll('.content-page').forEach(p => p.classList.add('hidden'));
-        document.getElementById('page-' + pageId).classList.remove('hidden');
+    function loadSiswa() {
+        const kelas = document.getElementById('pilihKelas').value;
+        const container = document.getElementById('siswaContainer');
+        if(!kelas) { container.innerHTML = ''; return; }
+
+        container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p>Mengambil daftar siswa...</p></div>';
+
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "getSiswa", kelas: "KELAS " + kelas })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.data && res.data.length > 0) {
+                let table = `<table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr><th>No</th><th>Nama Siswa</th><th width="150">Presensi</th></tr>
+                    </thead><tbody>`;
+                res.data.forEach((nama, i) => {
+                    table += `<tr>
+                        <td>${i+1}</td>
+                        <td>${nama}</td>
+                        <td>
+                            <select class="form-select form-select-sm">
+                                <option value="H">Hadir</option>
+                                <option value="S">Sakit</option>
+                                <option value="I">Izin</option>
+                                <option value="A">Alpha</option>
+                            </select>
+                        </td>
+                    </tr>`;
+                });
+                table += `</tbody></table><button class="btn btn-success w-100 py-3 fw-bold">SIMPAN JURNAL SEKARANG</button>`;
+                container.innerHTML = table;
+            } else {
+                container.innerHTML = '<div class="alert alert-warning">Siswa tidak ditemukan! Periksa sheet Anda.</div>';
+            }
+        });
     }
 
-    function logout() {
-        location.reload();
+    function showPage(id) {
+        document.querySelectorAll('.content-page').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.list-group-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('page-' + id).classList.remove('hidden');
+        event.currentTarget.classList.add('active');
     }
 </script>
-
 </body>
 </html>
